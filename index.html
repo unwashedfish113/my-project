@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Пользователисики</title>
+</head>
+<body>
+    <table id="usersTable" border="1">
+        <thead>
+            <tr><th>ID</th><th>Имя</th><th>Email</th></tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+    <div id="error" style="color: red;"></div>
+
+    <script>
+        async function loadUsers() {
+            const tbody = document.querySelector('#usersTable tbody');
+            const errorDiv = document.getElementById('error');
+
+            try {
+                const response = await fetch('/api/users');
+                // Проверка успешности HTTP-ответа
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const users = await response.json();
+
+                // Безопасное построение строк таблицы
+                const rows = users.map(user => {
+                    const tr = document.createElement('tr');
+                    
+                    const tdId = document.createElement('td');
+                    tdId.textContent = user.id; // Безопасно: текст, а не HTML
+                    
+                    const tdName = document.createElement('td');
+                    tdName.textContent = user.name; // Безопасно
+                    
+                    const tdEmail = document.createElement('td');
+                    tdEmail.textContent = user.email; // Безопасно
+                    
+                    tr.append(tdId, tdName, tdEmail);
+                    return tr;
+                });
+
+                // Безопасная замена содержимого tbody
+                tbody.replaceChildren(...rows);
+                errorDiv.textContent = '';
+            } catch (error) {
+                // Обработка ошибок
+                console.error('Ошибка загрузки:', error);
+                errorDiv.textContent = 'Не удалось загрузить данные. Попробуйте позже.';
+            }
+        }
+
+        loadUsers();
+    </script>
+</body>
+</html>
